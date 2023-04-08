@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Payment Form</title>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.2.7-rc.0/web3.min.js"></script>
+</head>
+<body>
+	<h1>Payment Form</h1>
+		<label for="name">Name:</label>
+		<input type="text" id="name" name="name" required><br><br>
+		
+		<label for="cardNumber">Address:</label>
+		<input type="text" id="cardNumber" name="cardNumber" required><br><br>
+		
+		<label for="expiryDate">State:</label>
+		<input type="text" id="expiryDate" name="expiryDate" required><br><br>
+		
+		<label for="cvv">Zip:</label>
+		<input type="text" id="cvv" name="cvv" required><br><br>
+		
+		<label for="amount">Country:</label>
+		<input type="text" id="amount" name="amount" min="0" step="0.01" required><br><br>
+		
+		<label for="email">Email:</label>
+		<input type="email" id="email" name="email" required><br><br>
+		
+		<input type="button" class="btn btn-primary" onclick="sendPayment()" value="Submit">
+        <script> // the below script code is convention in web3 in forming the communication with Web
+
+            let account;
+            const connectMetamask = async () => {
+                if(window.ethereum !== "undefined") {
+                    const accounts = await ethereum.request({method: "eth_requestAccounts"});
+                    account = accounts[0];
+                    //document.getElementById("userArea").innerHTML = `User Account: ${account}`;
+                    connectContract();
+                }
+            }
+    
+            const connectContract = async () => {
+                const ABI = [
+        {
+            "inputs": [],
+            "name": "deposit",
+            "outputs": [],
+            "stateMutability": "payable",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "getA",
+            "outputs": [
+                {
+                    "internalType": "string",
+                    "name": "retVal",
+                    "type": "string"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "getAddress",
+            "outputs": [
+                {
+                    "internalType": "address",
+                    "name": "",
+                    "type": "address"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "getBalance",
+            "outputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "string",
+                    "name": "a",
+                    "type": "string"
+                }
+            ],
+            "name": "setA",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address payable",
+                    "name": "_to",
+                    "type": "address"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "_amount",
+                    "type": "uint256"
+                }
+            ],
+            "name": "withdraw",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        }
+    ];
+                const Address = "0x45ae9f97c1e4539d1ec993035bcad795a97ce627"; // Taking Address from Remix 
+                window.web3 = await new Web3(window.ethereum);
+                window.contract = await new window.web3.eth.Contract(ABI, Address);
+                //document.getElementById("contractArea").innerHTML = "Connected to Contract"; // calling the elementID above
+            }
+    
+            const getContractAccount = async () => {
+                const data = await window.contract.methods.getAddress().call();
+                document.getElementById("contractAccount").innerHTML = `Contract Account: ${data}`;
+            }
+    
+            const getBalanceApple = async () => { // const getBalanceApple is the HTML function & .contract.getBalance is the smart contract function
+                const data = await window.contract.methods.getBalance().call();
+                document.getElementById("balanceArea").innerHTML = `Contract Balance: ${data}`;
+            }
+    
+            const depositContract = async () => {
+                //const amount = document.getElementById("depositInput").value;
+                const amount = 1;
+                await window.contract.methods.deposit().send({from: account, value: amount});
+            }
+    
+            const withdraw = async () => {
+                const amount = document.getElementById("amountInput").value;
+                const address = document.getElementById("addressInput").value;
+                await window.contract.methods.withdraw(address, amount).send({from: account});
+            }
+
+            const sendPayment = async () => {
+                await window.contract.methods.setA(document.getElementById("email").value).send({from: account});
+                getA();
+                depositContract();
+            }
+
+            const getA = async () => { // const getBalanceApple is the HTML function & .contract.getBalance is the smart contract function
+                const data = await window.contract.methods.getA().call();
+                alert(`Address Details: ${data}`);
+            }
+            
+            connectMetamask();
+        </script>
+</body>
+
+</html>
